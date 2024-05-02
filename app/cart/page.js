@@ -1,54 +1,37 @@
 'use client'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CartItem from '../components/CartItems';
 
+
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([]);
+  const [cart, setCart] = useState([]); // State untuk menyimpan keranjang belanja
 
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
 
-  const handleRemoveItem = (id) => {
-    const updatedCart = cartItems.filter(item => item.id !== id);
-    setCartItems(updatedCart);
-  };
-
-  const handleUpdateQuantity = (id, quantity) => {
-    const updatedCart = cartItems.map(item => {
-      if (item.id === id) {
-        return { ...item, quantity: parseInt(quantity) };
-      }
-      return item;
-    });
-    setCartItems(updatedCart);
-  };
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
 
   const handleApplyCoupon = (couponCode) => {
   };
 
-  const totalPrice = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const removeFromCart = (itemId) => {
+    const updatedCart = cart.filter(item => item.id !== itemId);
+    setCart(updatedCart);
+  };
 
   return (
     <div className="">
       <h1 className="">Keranjang</h1>
       <div className="">
-        {cartItems.map(item => (
-          <CartItem
-            key={item.id}
-            item={item}
-            onRemove={() => handleRemoveItem(item.id)}
-            onUpdateQuantity={(quantity) => handleUpdateQuantity(item.id, quantity)}
-          />
-        ))}
+        <CartItem cart={cart} removeFromCart={removeFromCart} />
       </div>
-      <div className="">
-        <div className="">
-          <input type="text" placeholder="Masukkan kode kupon" />
-          <button onClick={() => handleApplyCoupon()}>Gunakan Kupon</button>
-        </div>
-        <div className="">
-          <h3>Total Harga: {totalPrice}</h3>
-          <button onClick={() => setCartItems([])}>Hapus Semua</button>
-        </div>
-      </div>
+      
     </div>
   );
 };

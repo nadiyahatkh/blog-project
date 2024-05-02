@@ -1,20 +1,18 @@
 import React from 'react';
 
-const CartItem = ({ item, onRemove, onUpdateQuantity }) => {
+const CartItem = ({ cart, removeFromCart }) => {
   return (
-    <div className="">
-      <img src={`/images/${item.image}`} alt={item.name} />
-      <div className="">
-        <h3>{item.name}</h3>
-        <p>{item.price}</p>
-        <input
-          type="number"
-          min="1"
-          value={item.quantity}
-          onChange={(e) => onUpdateQuantity(e.target.value)}
-        />
-        <button onClick={onRemove}>Hapus</button>
-      </div>
+    <div>
+      <h2>Keranjang Belanja</h2>
+      <ul>
+        {cart.map(item => (
+          <li key={item.id}>
+            <div>{item.name}</div>
+            <div>Price: ${item.price}</div>
+            <button onClick={() => removeFromCart(item.id)}>Hapus</button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 };

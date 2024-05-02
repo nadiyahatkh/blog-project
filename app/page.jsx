@@ -1,14 +1,17 @@
 'use client'
-import { useState } from 'react';
-import { productsData } from '../data/productsData';
-import ProductCard from '../components/ProductCard';
+import { useState, useEffect } from 'react';
+import { productsData } from './data/productsData';
+import ProductCard from './components/ProductCard';
+import Cart from './cart/page';
 
-const Home = () => {
-  const [products, setProducts] = useState(productsData);
+export default function Home(){
+    const [products, setProducts] = useState(productsData);
   const [category, setCategory] = useState('all');
   const [cart, setCart] = useState([]);
 
-
+  const handleAddToCart = (product) => {
+    setCart(prevCart => [...prevCart, product]);
+  };
 
   const handleFilter = (category) => {
     setCategory(category);
@@ -21,18 +24,8 @@ const Home = () => {
     }
   };
 
-  const handleAddToCart = (productId) => {
-    console.log(handleAddToCart)
-    const existingProductIndex = cart.findIndex(item => item.id === productId);
-    if (existingProductIndex !== -1) {
-      const updatedCart = [...cart];
-      updatedCart[existingProductIndex].quantity += 1;
-      setCart(updatedCart);
-    } else {
-      const productToAdd = products.find(product => product.id === productId);
-      setCart([...cart, { ...productToAdd, quantity: 1 }]);
-    }
-  };
+  
+
   
 
 
@@ -49,12 +42,10 @@ const Home = () => {
             <ProductCard 
             key={product.id} 
             product={product}
-            handleAddToCart={handleAddToCart} 
+            onAddToCart={() => handleAddToCart(product)} // Menambahkan properti untuk menangani penambahan ke keranjang
             />
           ))}
         </div>
       </div>
   );
 };
-
-export default Home;
