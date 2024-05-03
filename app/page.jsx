@@ -9,8 +9,21 @@ export default function Home(){
   const [category, setCategory] = useState('all');
   const [cart, setCart] = useState([]);
 
+  console.log(cart)
+  useEffect(() => {
+    const storedCart = localStorage.getItem('cart');
+    console.log(storedCart)
+    if (storedCart) {
+      setCart(JSON.parse(storedCart));
+    }
+  }, []);
+
+
   const handleAddToCart = (product) => {
-    setCart(prevCart => [...prevCart, product]);
+    const cartItem = {...product, cartId: Math.random().toString(36).substring(7)}
+    localStorage.setItem('cart', JSON.stringify([...cart, cartItem]));
+
+    setCart(prevCart => [...prevCart, cartItem]);
   };
 
   const handleFilter = (category) => {

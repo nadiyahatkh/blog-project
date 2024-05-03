@@ -1,6 +1,9 @@
 
 export default function ProductCard({product, onAddToCart}){
-
+  const handleAddToCart = () => {
+    const cartItem = { ...product, cartId: Math.random().toString(36).substring(7) }; // Menambahkan cartId ke objek produk
+    onAddToCart(cartItem);
+  };
   return (
     <div className="w-full max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 my-5">
       <a href="#">
@@ -12,7 +15,7 @@ export default function ProductCard({product, onAddToCart}){
         </a>
         <div className="flex items-center justify-between mt-3">
           <span className="text-3xl font-bold text-gray-900 dark:text-white">Rp{product.price}</span>
-          <button onClick={() => onAddToCart(product)}>Tambah ke Keranjang</button>
+          <button onClick={handleAddToCart}>Tambah ke Keranjang</button>
         </div>
       </div>
     </div>
