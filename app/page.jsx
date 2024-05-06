@@ -9,22 +9,36 @@ export default function Home(){
   const [category, setCategory] = useState('all');
   const [cart, setCart] = useState([]);
 
-  console.log(cart)
+  // console.log(cart)
   useEffect(() => {
     const storedCart = localStorage.getItem('cart');
-    console.log(storedCart)
+    // console.log(storedCart)
     if (storedCart) {
       setCart(JSON.parse(storedCart));
     }
   }, []);
 
-
   const handleAddToCart = (product) => {
-    const cartItem = {...product, cartId: Math.random().toString(36).substring(7)}
-    localStorage.setItem('cart', JSON.stringify([...cart, cartItem]));
-
-    setCart(prevCart => [...prevCart, cartItem]);
+    const existingItemIndex = cart.findIndex(item => item.id === product.id);
+    if (existingItemIndex !== -1) {
+      const updatedCart = [...cart];
+      updatedCart[existingItemIndex].quantity += 1;
+      setCart(updatedCart);
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+    } else {
+      const cartItem = { ...product, cartId: Math.random().toString(36).substring(7), quantity: 1 };
+      setCart(prevCart => [...prevCart, cartItem]);
+      localStorage.setItem('cart', JSON.stringify([...cart, cartItem]));
+    }
   };
+  
+
+  // const handleAddToCart = (product) => {
+  //   const cartItem = {...product, cartId: Math.random().toString(36).substring(7)}
+  //   localStorage.setItem('cart', JSON.stringify([...cart, cartItem]));
+
+  //   setCart(prevCart => [...prevCart, cartItem]);
+  // };
 
   const handleFilter = (category) => {
     setCategory(category);
