@@ -1,6 +1,7 @@
 "use client"
 import Link from 'next/link'
 import { useRouter } from 'next/router'
+import { useState } from 'react'
 import {FaCartPlus} from 'react-icons/fa'
 
 export default function Navbar(){

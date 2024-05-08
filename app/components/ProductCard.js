@@ -15,7 +15,7 @@ export default function ProductCard({product, onAddToCart}){
         </a>
         <div className="flex items-center justify-between mt-3">
           <span className="text-3xl font-bold text-gray-900 dark:text-white">Rp{product.price}</span>
-          <button onClick={handleAddToCart}>Tambah ke Keranjang</button>
+          <button className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" onClick={handleAddToCart}>Add To Cart</button>
         </div>
       </div>
     </div>

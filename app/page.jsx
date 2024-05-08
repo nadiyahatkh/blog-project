@@ -21,6 +21,7 @@ export default function Home(){
   const handleAddToCart = (product) => {
     const existingItemIndex = cart.findIndex(item => item.id === product.id);
     if (existingItemIndex !== -1) {
+      alert('berhasil add tocart')
       const updatedCart = [...cart];
       updatedCart[existingItemIndex].quantity += 1;
       setCart(updatedCart);
