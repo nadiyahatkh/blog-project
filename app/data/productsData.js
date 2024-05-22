@@ -4,6 +4,7 @@ export const productsData = [
       name: 'AirPods',
       image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
       price: 400000,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
       category: 'elektronik',
     },
     {
@@ -11,6 +12,7 @@ export const productsData = [
       name: 'Iphone Xr',
       image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrAPREhQPlXwyK5BGpEm4xVzwleypxs0JlzPvZEjdw6w&s',
       price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
       category: 'elektronik',
     },
     {
@@ -18,6 +20,7 @@ export const productsData = [
       name: 'Wide trousers',
       image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
       price: 699900,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
       category: 'pakaian',
     },
     {
@@ -25,6 +28,7 @@ export const productsData = [
       name: 'Produk 2',
       image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
       price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
       category: 'elektronik',
     },
     {
@@ -32,6 +36,7 @@ export const productsData = [
       name: 'Produk 2',
       image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
       price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
       category: 'pakaian',
     },
     {
@@ -39,6 +44,47 @@ export const productsData = [
       name: 'Produk 2',
       image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
       price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
       category: 'pakaian',
+    },
+    {
+      id: 7,
+      name: 'Produk 2',
+      image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
+      price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+      category: 'pakaian',
+    },
+    {
+      id: 8,
+      name: 'Produk 2',
+      image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
+      price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+      category: 'pakaian',
+    },
+    {
+      id: 9,
+      name: 'Produk 2',
+      image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
+      price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+      category: 'elektronik',
+    },
+    {
+      id: 10,
+      name: 'Produk 2',
+      image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
+      price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+      category: 'pakaian',
+    },
+    {
+      id: 11,
+      name: 'Produk 2',
+      image: 'https://cdn.eraspace.com/media/catalog/product/a/i/airpods_3rd_generation__1_1.jpg',
+      price: 100,
+      desc: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+      category: 'elektronik',
     }
   ];
