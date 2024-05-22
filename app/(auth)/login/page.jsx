@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import axios from 'axios';
+import {  useRouter } from 'next/navigation';
+
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isSignUp, setIsSignUp] = useState(true);
   const [loginValue, setLoginValue] = useState({
     email: '',
@@ -43,23 +46,21 @@ export default function LoginPage() {
         console.log('Pendaftaran berhasil', response.data);
         setIsSignUp(false);
       } else {
-        const result = await signIn('credentials', {
+        const res= await signIn('credentials', {
           redirect: false,
           email: loginValue.email,
           password: loginValue.password,
           callbackUrl: "/"
         });
-        if (result.error) {
-          if (result.error === 'TokenExpiredError') {
-            console.log('Token has expired. Please sign in again.');
-          } else {
-            throw new Error(result.error);
-          }
-        } else {
-          console.log('Masuk berhasil', result);
-        }
+console.log(res)
+
+        if (!res?.error) {
+        router.push("/");
+      } else {
+        console.log(res.error);
       }
-    } catch (error) {
+    }
+   }catch (error) {
       setErrors({ message: error.response?.data?.message || error.message });
     } finally {
       setLoading(false);
