@@ -1,5 +1,5 @@
-'use client';
-import { useState, useEffect } from 'react';
+'use client'
+import React, { useState, useEffect } from 'react';
 import CartItem from '../components/CartItems';
 import {
   Box,
@@ -25,108 +25,135 @@ import {
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { formatCurrency } from '../utils/formatCurrency';
-
+import { checkOut, fetchCart, updateCartQuantity, removeFromCartAPI, removeAllItemsAPI } from '../apiService';
+import { useSession } from 'next-auth/react';
 
 const Cart = () => {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState();
   const [totalPrice, setTotalPrice] = useState(0);
-  const [discount, setDiscount] = useState(0);
-  const [couponCode, setCouponCode] = useState(''); 
-  const [discountAmount, setDiscountAmount] = useState(0);
-
-  useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
-    if (storedCart) {
-      setCart(JSON.parse(storedCart));
-    }
-  }, []);
+  const [discountPrice, setDiscountPrice] = useState(0);
+  const [couponCode, setCouponCode] = useState('');
+  const { data: session } = useSession();
+  const token = session?.user?.token;
 
   // useEffect(() => {
-  //   const fetchCart = async () => {
-  //     try {
-  //       const response = await fetch('http://192.168.18.103:8000/api/cart');
-  //       const data = await response.json();
-  //       setCart(data.cartItems);
-  //       setTotalPrice(data.totalPrice);
-  //     } catch (error) {
-  //       console.error('Error fetching cart:', error);
+  //   const loadCart = async () => {
+  //     const cartData = await fetchCart({ token, couponCode });
+  //     if (cartData) {
+  //       // Tambahkan properti `id` secara manual untuk setiap item
+  //       const updatedCartItems = cartData.cartItems.map((item, index) => ({
+  //         ...item,
+  //         id: index + 1, // Menggunakan index sebagai id sementara
+  //       }));
+  
+  //       console.log('Updated cart data with IDs:', { ...cartData, cartItems: updatedCartItems }); // Logging
+  //       setCart({ ...cartData, cartItems: updatedCartItems });
+  //       setTotalPrice(cartData.totalpricee);
+  //       setDiscountPrice(cartData.discountprice);
   //     }
   //   };
-
-  //   fetchCart();
-  // }, []);
-
-  useEffect(() => {
-    const total = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    const totalAfterDiscount = total - discount;
-    setTotalPrice(totalAfterDiscount >= 0 ? totalAfterDiscount : 0);
-
-    // Hitung jumlah diskon
-    const calculatedDiscount = total - totalAfterDiscount;
-    setDiscountAmount(calculatedDiscount);
-  }, [cart, discount]);
-
-  // const updateQuantity = async (cartId, newQuantity) => {
-  //   try {
-  //     const response = await fetch(`/api/cart/updateQuantity/${cartId}`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       },
-  //       body: JSON.stringify({ quantity: newQuantity })
-  //     });
-  //     const data = await response.json();
-
-  //     if (response.ok) {
-  //       const updatedCart = cart.map(item => {
-  //         if (item.id === cartId) {
-  //           return data.updatedCartItem;
-  //         }
-  //         return item;
-  //       });
-  //       setCart(updatedCart);
-  //       setTotalPrice(data.totalpri);
-  //     } else {
-  //       console.error('Failed to update quantity:', data.message);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error updating quantity:', error);
+  
+  //   if (token) {
+  //     loadCart();
   //   }
-  // };
-
-  const updateQuantity = (cartId, newQuantity) => {
-    const updatedCart = cart.map(item => {
-      if (item.cartId === cartId) {
-        return { ...item, quantity: newQuantity };
+  // }, [session, couponCode, token]);
+  useEffect(() => {
+    const loadCart = async () => {
+      const cartData = await fetchCart({ token, couponCode });
+      if (cartData) {
+        setCart(cartData);
+        setTotalPrice(cartData.totalpricee);
+        setDiscountPrice(cartData.discountprice);
       }
-      return item;
-    });
-    setCart(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    };
+
+    if (token) {
+      loadCart();
+    }
+  }, [session, couponCode, token]);
+  
+
+  const handleQuantityChange = async (id, newQuantity) => {
+    console.log('handleQuantityChange called with id:', id, 'and newQuantity:', newQuantity);
+  
+    try {
+      const result = await updateCartQuantity({ id, newQuantity, token });
+      console.log('updateCartQuantity result:', result);
+  
+      if (result && result.success) {
+        const updatedCartItems = cart.cartItems.map(item => {
+          if (item.id === id) {
+            return { ...item, quantity: newQuantity };
+          }
+          return item;
+        });
+        setCart({ ...cart, cartItems: updatedCartItems });
+        const updatedTotalPrice = updatedCartItems.reduce((total, item) => total + (item.quantity * item.price), 0);
+        setTotalPrice(updatedTotalPrice);
+      } else {
+        console.error('Error memperbarui jumlah keranjang:', result?.message || 'Kesalahan tidak diketahui');
+      }
+    } catch (error) {
+      console.error('Error memperbarui jumlah keranjang:', error);
+    }
   };
+  
 
-  const handleApplyCoupon = () => {
-    const validCoupons = ['DISCOUNT10', 'SALE20'];
-    if (validCoupons.includes(couponCode)) {
-      if (couponCode === 'DISCOUNT10') {
-        setDiscount(100);
-      } else if (couponCode === 'SALE20') {
-        setDiscount(20);
+  const handleApplyCoupon = async () => {
+    try {
+      const cartData = await fetchCart({ token, couponCode });
+      if (cartData) {
+        setCart(cartData);
+        setTotalPrice(cartData.totalpricee);
+        setDiscountPrice(cartData.discountprice);
+      } else {
+        alert('Kode kupon tidak valid atau sudah kadaluarsa');
       }
-    } else {
-      alert('Kode kupon tidak valid');
+    } catch (error) {
+      console.error('Error applying coupon:', error);
     }
   };
 
-  const removeFromCart = (cartId) => {
-    const updatedCart = cart.filter(item => item.id !== cartId);
-    setCart(updatedCart);
+  const removeFromCart = async (id) => {
+    try {
+      console.log('Removing item with ID:', id); // Logging
+      const result = await removeFromCartAPI({ id, token });
+      console.log('removeFromCartAPI result:', result); // Logging
+
+      if (result && result.success) {
+        const updatedCart = cart.cartItems.filter(item => item.id !== id);
+        setCart({ ...cart, cartItems: updatedCart });
+        const updatedTotalPrice = updatedCart.reduce((total, item) => total + (item.quantity * item.price), 0);
+        setTotalPrice(updatedTotalPrice);
+      } else {
+        console.error('Error removing item from cart:', result?.message || 'Kesalahan tidak diketahui');
+      }
+    } catch (error) {
+      console.error('Error removing item from cart:', error);
+    }
   };
 
-  const removeAllItems = () => {
-    setCart([]); 
-    setTotalPrice(0);
-    setDiscount(0);
+  const removeAllItems = async () => {
+    try {
+      const result = await removeAllItemsAPI({ token });
+      if (result && result.success) {
+        setCart({ cartItems: [] });
+        setTotalPrice(0);
+        setDiscountPrice(0);
+      } else {
+        console.error('Error removing all items from cart:', result?.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error removing all items from cart:', error);
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      const result = await checkOut({ token });
+    } catch (error) {
+      console.error('Error during checkout:', error);
+    }
   };
 
   return (
@@ -136,9 +163,18 @@ const Cart = () => {
         <div className="grid grid-cols-4 gap-4">
           <div className="col-span-3">
             <div className="bg-white rounded border shadow-md p-4">
-              {cart.map(product => (
-                <CartItem key={product.cartId} product={product} removeFromCart={removeFromCart} updateQuantity={updateQuantity} />
-              ))}
+              {cart && cart.cartItems?.length > 0 ? (
+                cart.cartItems?.map(product => (
+                  <CartItem
+                    key={product.id}
+                    product={product}
+                    removeFromCart={removeFromCart}
+                    updateQuantity={handleQuantityChange}
+                  />
+                ))
+              ) : (
+                <p>Keranjang belanja Anda kosong</p>
+              )}
               <div className="flex items-center justify-between w-full">
                 <Link href="/" className="rounded border bg-blue-500 text-white p-2 text-sm">
                   Back to shop
@@ -160,18 +196,18 @@ const Cart = () => {
             <div className="bg-white rounded border shadow-sm p-4 flex-grow-0">
               <div className="flex items-center justify-between w-full">
                 <p className="font-normal text-sm leading-8">Sub total:</p>
-                <h6 className="font-normal text-sm leading-8 text-gray-900">{formatCurrency(totalPrice + discountAmount)}</h6>
+                <h6 className="font-normal text-sm leading-8 text-gray-900">{formatCurrency(totalPrice + discountPrice)}</h6>
               </div>
               <div className="flex items-center justify-between w-full">
                 <p className="font-normal text-sm leading-8">Discount:</p>
-                <h6 className="font-normal text-sm leading-8 text-red-600">- {formatCurrency(discountAmount)}</h6>
+                <h6 className="font-normal text-sm leading-8 text-red-600">- {formatCurrency(discountPrice)}</h6>
               </div>
               <hr className="my-4" />
               <div className="flex items-center w-full justify-between">
                 <p className="text-sm font-bold">Total</p>
                 <h6 className="mb-1 text-sm font-bold">{formatCurrency(totalPrice)}</h6>
               </div>
-              <button className="mt-6 w-full rounded-md bg-green-500 py-1.5 font-medium text-blue-50 hover:bg-green-200">Check out</button>
+              <button className="mt-6 w-full rounded-md bg-green-500 py-1.5 font-medium text-blue-50 hover:bg-green-200" onClick={handleCheckout}>Check out</button>
             </div>
           </div>
         </div>

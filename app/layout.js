@@ -3,6 +3,9 @@ import "./globals.css";
 import Navbar from "./navbar";
 import { Providers } from "./providers";
 import { usePathname } from "next/navigation";
+import { SessionProvider } from "next-auth/react";
+import NextAuth from "@/lib/next-auth/NextAuth";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,10 +19,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
+        <NextAuth>
         <Providers>
         <Navbar />
         {children}
         </Providers>
+        </NextAuth>
         </body>
     </html>
   );
