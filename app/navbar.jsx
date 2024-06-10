@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -30,8 +30,10 @@ export default function Navbar() {
     return (
         <nav className="border-gray-200 shadow-md">
             <div className={`max-w-screen-xl flex ${isLoginPage ? 'justify-center' : 'justify-between'} items-center mx-auto p-4`}>
-                <img src="./logo-symbol.png" alt="" />
-                <span className="self-center text-2xl font-semibold whitespace-nowrap text-blue-300">Brand</span>
+                <div className="flex items-center">
+                    <img src="./logo-symbol.png" alt="" />
+                    <span className="self-center text-2xl font-semibold whitespace-nowrap text-blue-300 ml-2">Brand</span>
+                </div>
                 {!isLoginPage && (
                     <div className="flex items-center ml-auto space-x-6">
                         <Link href="/">
@@ -60,7 +62,6 @@ export default function Navbar() {
                             onClick={toggleDropdown}
                             type='button'
                             className={`flex flex-col items-center text-gray-600 hover:text-blue-800 ${activeButton === 'profile' ? 'text-blue-800' : ''}`}
-                            
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                                 <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
@@ -70,6 +71,7 @@ export default function Navbar() {
                         {isOpen && (
                             <div className="origin-top-right absolute right-0 mt-2 w-44 rounded-lg shadow-lg bg-white ring-1 ring-black ring-opacity-5">
                                 <ul role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                                    <Link href="./ChangeUser">
                                     <li>
                                         <p
                                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -78,6 +80,7 @@ export default function Navbar() {
                                             Profile
                                         </p>
                                     </li>
+                                    </Link>
                                     <li>
                                         {status === 'authenticated' ? (
                                             <button

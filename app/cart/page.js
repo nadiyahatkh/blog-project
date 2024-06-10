@@ -2,26 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import CartItem from '../components/CartItems';
 import {
-  Box,
-  Button,
-  Card,
-  CardHeader,
-  CardBody,
-  CardFooter,
-  FormControl,
-  FormLabel,
   Heading,
   Input,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Stack,
-  StackDivider,
-  Text
 } from '@chakra-ui/react';
 import Link from 'next/link';
 import { formatCurrency } from '../utils/formatCurrency';
@@ -36,27 +18,6 @@ const Cart = () => {
   const { data: session } = useSession();
   const token = session?.user?.token;
 
-  // useEffect(() => {
-  //   const loadCart = async () => {
-  //     const cartData = await fetchCart({ token, couponCode });
-  //     if (cartData) {
-  //       // Tambahkan properti `id` secara manual untuk setiap item
-  //       const updatedCartItems = cartData.cartItems.map((item, index) => ({
-  //         ...item,
-  //         id: index + 1, // Menggunakan index sebagai id sementara
-  //       }));
-  
-  //       console.log('Updated cart data with IDs:', { ...cartData, cartItems: updatedCartItems }); // Logging
-  //       setCart({ ...cartData, cartItems: updatedCartItems });
-  //       setTotalPrice(cartData.totalpricee);
-  //       setDiscountPrice(cartData.discountprice);
-  //     }
-  //   };
-  
-  //   if (token) {
-  //     loadCart();
-  //   }
-  // }, [session, couponCode, token]);
   useEffect(() => {
     const loadCart = async () => {
       const cartData = await fetchCart({ token, couponCode });
@@ -66,40 +27,48 @@ const Cart = () => {
         setDiscountPrice(cartData.discountprice);
       }
     };
-
     if (token) {
       loadCart();
     }
   }, [session, couponCode, token]);
-  
 
   const handleQuantityChange = async (id, newQuantity) => {
-    console.log('handleQuantityChange called with id:', id, 'and newQuantity:', newQuantity);
-  
     try {
       const result = await updateCartQuantity({ id, newQuantity, token });
-      console.log('updateCartQuantity result:', result);
+      console.log(result)
+      if (result && result.message === 'Quantity updated successfully') {
+        if (cart && cart.cartItems) {
+          const updatedCartItems = cart.cartItems.map(item => {
+            if (item.id === id) {
+              return { ...item, quantity: newQuantity };
+            }
+            return item;
+          });
+          const updatedCart = { ...cart, cartItems: updatedCartItems };
+          setCart(updatedCart);
   
-      if (result && result.success) {
-        const updatedCartItems = cart.cartItems.map(item => {
-          if (item.id === id) {
-            return { ...item, quantity: newQuantity };
-          }
-          return item;
-        });
-        setCart({ ...cart, cartItems: updatedCartItems });
-        const updatedTotalPrice = updatedCartItems.reduce((total, item) => total + (item.quantity * item.price), 0);
-        setTotalPrice(updatedTotalPrice);
+          // Update totalPrice based on updatedCart
+          const updatedTotalPrice = updatedCart.cartItems.reduce((total, item) => total + (item.quantity * item.price), 0);
+          setTotalPrice(updatedTotalPrice);
+        } else {
+          console.error('Invalid cart data:', cart);
+        }
       } else {
-        console.error('Error memperbarui jumlah keranjang:', result?.message || 'Kesalahan tidak diketahui');
+        console.error('Failed to update item from cart:', result?.message || 'Unknown error');
       }
     } catch (error) {
-      console.error('Error memperbarui jumlah keranjang:', error);
+      console.error('Error updating cart quantity:', error);
     }
   };
   
+  
+  
+  
+  
+  
 
   const handleApplyCoupon = async () => {
+    console.log('Applying coupon code:', couponCode);
     try {
       const cartData = await fetchCart({ token, couponCode });
       if (cartData) {
@@ -107,7 +76,7 @@ const Cart = () => {
         setTotalPrice(cartData.totalpricee);
         setDiscountPrice(cartData.discountprice);
       } else {
-        alert('Kode kupon tidak valid atau sudah kadaluarsa');
+        alert('Invalid or expired coupon code');
       }
     } catch (error) {
       console.error('Error applying coupon:', error);
@@ -116,17 +85,15 @@ const Cart = () => {
 
   const removeFromCart = async (id) => {
     try {
-      console.log('Removing item with ID:', id); // Logging
       const result = await removeFromCartAPI({ id, token });
-      console.log('removeFromCartAPI result:', result); // Logging
 
-      if (result && result.success) {
+      if (result && result.message && result.message.includes('success')) {
         const updatedCart = cart.cartItems.filter(item => item.id !== id);
         setCart({ ...cart, cartItems: updatedCart });
         const updatedTotalPrice = updatedCart.reduce((total, item) => total + (item.quantity * item.price), 0);
         setTotalPrice(updatedTotalPrice);
       } else {
-        console.error('Error removing item from cart:', result?.message || 'Kesalahan tidak diketahui');
+        console.error('Failed to remove item from cart:', result?.message || 'Unknown error');
       }
     } catch (error) {
       console.error('Error removing item from cart:', error);
@@ -136,7 +103,9 @@ const Cart = () => {
   const removeAllItems = async () => {
     try {
       const result = await removeAllItemsAPI({ token });
-      if (result && result.success) {
+
+      if (result && result.message && result.message.includes('success')) {
+        console.log('All items removed successfully:', result.message);
         setCart({ cartItems: [] });
         setTotalPrice(0);
         setDiscountPrice(0);
@@ -150,11 +119,36 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     try {
-      const result = await checkOut({ token });
+        // Lakukan checkout
+        const result = await checkOut({ token });
+
+        if (result && result.status && result.status === 'Berhasil Checkout') {
+            setCart(result.updatedCart);
+            setTotalPrice(0);
+            setDiscountPrice(0);
+            alert('Checkout berhasil!');
+        } else {
+            // Jika ada kesalahan selama checkout, log pesan error
+            if (result && result.status) {
+                // Jika respons memiliki status, namun bukan 'Berhasil Checkout', tampilkan pesan kesalahan
+                alert(result.status); // Menampilkan pesan kesalahan dari server
+            } else {
+                // Jika respons tidak memiliki status, tampilkan pesan kesalahan default
+                alert('Error saat proses checkout. Silakan coba lagi.');
+            }
+        }
     } catch (error) {
-      console.error('Error during checkout:', error);
+        // Jika terjadi kesalahan, log pesan error
+        console.error('Error saat proses checkout:', error);
+        alert('Error saat proses checkout. Silakan coba lagi.');
     }
-  };
+};
+
+
+  
+  
+  
+  
 
   return (
     <div className="py-4" style={{ backgroundColor: '#F7FAFC' }}>

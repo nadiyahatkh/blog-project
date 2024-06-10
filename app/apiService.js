@@ -162,3 +162,23 @@ export const fetchProducts = async ({token}) => {
     }
   };
   
+
+  export const fetchUser = async ({ token }) => {
+    try {
+      const response = await fetch(`http://192.168.18.103:8000/api/user`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      return null;
+    }
+  };

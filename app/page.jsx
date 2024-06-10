@@ -1,8 +1,9 @@
 'use client'
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from './components/ProductCard';
 import { addToCart, fetchCategories, fetchProducts, fetchProductsByCategory } from './apiService';
 import { useSession } from 'next-auth/react';
+import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalFooter, Button } from '@chakra-ui/react';
 
 export default function Home() {
   const [products, setProducts] = useState([]);
@@ -10,14 +11,15 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [cart, setCart] = useState([]);
   const [activeCategory, setActiveCategory] = useState('all');
-
-  const {data:session} = useSession()
-
-  const token = session?.user?.token
+  const { data: session } = useSession();
+  const token = session?.user?.token;
+  const [showOutOfStockModal, setShowOutOfStockModal] = useState(false); // State untuk menampilkan modal stok habis
+  const [showAddToCartModal, setShowAddToCartModal] = useState(false); // State untuk menampilkan modal "Add to Cart"
+  const [selectedProduct, setSelectedProduct] = useState(null);// State untuk menyimpan produk yang dipilih// State untuk menyimpan produk yang dipilih
 
   useEffect(() => {
     const loadProducts = async () => {
-      const productsData = await fetchProducts({token: token});
+      const productsData = await fetchProducts({ token: token });
       setProducts(productsData.data);
       setFilteredProducts(productsData.data); // Inisialisasi produk yang telah difilter
     };
@@ -31,8 +33,6 @@ export default function Home() {
     loadCategories();
   }, [session]);
 
-  
-
   const handleFilter = async (categoryId) => {
     setActiveCategory(categoryId);
     if (categoryId === 'all') {
@@ -45,16 +45,35 @@ export default function Home() {
 
   const handleAddToCart = async (product) => {
     try {
-      const response = await addToCart({ token: token, productId: product.id });
+      if (product.stock < 1) { // Periksa apakah stok produk habis
+        setShowOutOfStockModal(true); // Tampilkan modal stok habis jika stok habis
+        setSelectedProduct(product); // Simpan produk yang dipilih untuk ditampilkan dalam modal
+        return; // Hentikan eksekusi penambahan produk ke keranjang jika stok habis
+      }
+      setSelectedProduct(product); // Set produk yang dipilih untuk ditambahkan ke keranjang
+      setShowAddToCartModal(true); // Tampilkan modal "Add to Cart"
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+      alert('An error occurred while adding the product to cart. Please try again later.');
+    }
+  };
+
+  // Fungsi untuk menambahkan produk ke keranjang setelah pengguna mengkonfirmasi
+  const handleAddToCartConfirmation = async () => {
+    try {
+      const response = await addToCart({ token: token, productId: selectedProduct.id });
       console.log('Response from addToCart:', response);
 
       if (response && response.success) {
         setCart([...cart, response.data]);
-        alert(message);
+      } else {
+        setShowAddToCartModal(false);
       }
     } catch (error) {
       console.error('Error adding product to cart:', error);
       alert('An error occurred while adding the product to cart. Please try again later.');
+    } finally {
+      setShowAddToCartModal(false); // Tutup modal "Add to Cart"
     }
   };
 
@@ -67,13 +86,11 @@ export default function Home() {
             <hr className="mb-4" />
             <h2 className="text-sm font-bold">Category</h2>
             <div className="mt-2">
-              
               {categories?.map((category) => (
                 <p
                   key={category.id}
                   onClick={() => handleFilter(category.id)}
                   className={`cursor-pointer ${activeCategory === category.id ? ' text-blue-500' : ''}`}
-                  // style={{ cursor: 'pointer', fontWeight: activeCategory === category.id ? 'bold' : 'normal' }}
                 >
                   {category.name}
                 </p>
@@ -81,7 +98,6 @@ export default function Home() {
               <p
                 onClick={() => handleFilter('all')}
                 className={`cursor-pointer ${activeCategory === 'all' ? ' text-blue-500' : ''}`}
-                // style={{ cursor: 'pointer', fontWeight: activeCategory === 'all' ? 'bold' : 'normal' }}
               >
                 See all
               </p>
@@ -103,6 +119,35 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Modal Stok Habis */}
+      <Modal isOpen={showOutOfStockModal} onClose={() => setShowOutOfStockModal(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Out of Stock</ModalHeader>
+          <ModalBody>
+            <p>{selectedProduct?.name} is currently out of stock. Please check back later.</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setShowOutOfStockModal(false)}>Close</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal Add to Cart */}
+      <Modal isOpen={showAddToCartModal} onClose={() => setShowAddToCartModal(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Add to Cart</ModalHeader>
+          <ModalBody>
+            <p>Are you sure you want to add {selectedProduct?.name} to your cart?</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={handleAddToCartConfirmation}>Yes</Button>
+            <Button variant="ghost" onClick={() => setShowAddToCartModal(false)}>No</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

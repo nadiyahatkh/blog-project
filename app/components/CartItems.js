@@ -6,7 +6,6 @@ const CartItem = ({ product, removeFromCart, updateQuantity }) => {
 
   const handleIncrease = async () => {
     const newQuantity = quantity + 1;
-    console.log(product.id, newQuantity)
     await updateQuantity(product.id, newQuantity);
     setQuantity(newQuantity);
   };
@@ -14,7 +13,6 @@ const CartItem = ({ product, removeFromCart, updateQuantity }) => {
   const handleDecrease = async () => {
     if (quantity > 1) {
       const newQuantity = quantity - 1;
-      console.log(product.id, newQuantity)
       await updateQuantity(product.id, newQuantity);
       setQuantity(newQuantity);
     }
@@ -23,7 +21,6 @@ const CartItem = ({ product, removeFromCart, updateQuantity }) => {
   const handleInputChange = async (e) => {
     const newQuantity = parseInt(e.target.value, 10);
     if (!isNaN(newQuantity) && newQuantity >= 1) {
-      console.log(product.id, newQuantity)
       await updateQuantity(product.id, newQuantity);
       setQuantity(newQuantity);
     }
